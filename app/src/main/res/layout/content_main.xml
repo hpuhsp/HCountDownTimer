@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myFlip="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <EditText
+        android:id="@+id/et_seconds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="40dip" />
+
+    <com.reesehu.hcountdowntimer.view.FlipLayout
+        android:id="@+id/bit_flip"
+        android:layout_width="60dip"
+        android:layout_height="80dip"
+        android:layout_gravity="center_horizontal"
+        android:background="#ffffff"
+        myFlip:flipTextBackground="#ffffff"
+        myFlip:flipTextColor="#ff5588"
+        myFlip:flipTextSize="64sp" />
+
+    <Button
+        android:id="@+id/btn_test"
+        android:layout_width="80dip"
+        android:layout_height="50dip"
+        android:layout_marginTop="40dip" />
+
+</LinearLayout>
