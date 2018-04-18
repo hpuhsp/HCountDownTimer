@@ -65,24 +65,6 @@ public class NumberCDView extends FrameLayout {
      */
     public void setCountDownValues(long millisLeft) {
         mMillisLeft = millisLeft; // 截止时间的间隔
-        // 实现翻转和倒计时的同步
-        myCountDownTimer = new MyCountDownTimer(mMillisLeft, 1000, "NumberCDView") {
-            @Override
-            public void onTick(long millisUntilFinished) { // 每秒的变化
-                checkAndFlip(millisUntilFinished);
-            }
-
-            @Override
-            public void onFinish() { // 倒计时完成
-                if (!myCountDownTimer.isStop()) {
-                    myCountDownTimer.stop();
-                }
-                if (null != mOnCountDownStateListener) {
-                    mOnCountDownStateListener.onTimerFinished();
-                }
-            }
-        };
-
     }
 
     private OnCountDownStateListener mOnCountDownStateListener;
@@ -101,6 +83,11 @@ public class NumberCDView extends FrameLayout {
      * 开始倒计时
      */
     public void start() {
+        if (null != myCountDownTimer && !myCountDownTimer.isStop()) {
+            myCountDownTimer.stop();
+            myCountDownTimer = null;
+        }
+
         // 设置从天数到秒数的默认显示文案，获取日时分秒的单位值
         // 初始化显示
         int[] longs = calculateTime(mMillisLeft);
@@ -109,6 +96,24 @@ public class NumberCDView extends FrameLayout {
         mHourFlipView.setTimeValue(longs[1]);
         mMinuteFlipView.setTimeValue(longs[2]);
         mSecondFlipView.setTimeValue(longs[3]);
+
+        // 实现翻转和倒计时的同步
+        myCountDownTimer = new MyCountDownTimer(mMillisLeft, 1000, "NumberCDView") {
+            @Override
+            public void onTick(long millisUntilFinished) { // 每秒的变化
+                checkAndFlip(millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() { // 倒计时完成
+                if (!myCountDownTimer.isStop()) {
+                    myCountDownTimer.stop();
+                }
+                if (null != mOnCountDownStateListener) {
+                    mOnCountDownStateListener.onTimerFinished();
+                }
+            }
+        };
 
         if (mMillisLeft > 0) { // 开始预先滚动
             // 预先减去一秒

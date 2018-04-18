@@ -392,7 +392,7 @@ public class FlipLayout extends FrameLayout {
         // 初始化默认显示
         mInvisibleTextView.setText(String.valueOf(nextValue));
         isFlipping = true;
-        mScroller.startScroll(0, 0, 0, layoutHeight, 600);
+        mScroller.startScroll(0, 0, 0, layoutHeight, 750);
         postInvalidate();
     }
 

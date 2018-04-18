@@ -18,7 +18,7 @@ public class PageActivity extends AppCompatActivity implements NumberCDView.OnCo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_page);
         final NumberCDView numberCDView = findViewById(R.id.num_cd_view);
-        numberCDView.setCountDownValues(1000 * 60); // 传入的是剩余的时间段，毫秒级
+        numberCDView.setCountDownValues(1000 * 10 + 200); // 传入的是剩余的时间段，毫秒级
 
         Button button = findViewById(R.id.btn_test);
         button.setOnClickListener(new View.OnClickListener() {
