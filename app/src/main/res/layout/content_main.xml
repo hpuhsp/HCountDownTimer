@@ -30,4 +30,12 @@
         android:layout_height="50dip"
         android:layout_marginTop="40dip" />
 
+    <com.reesehu.hcountdowntimer.view.NumberCDView
+        android:id="@+id/num_cd_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="50dip"
+        android:background="@android:color/holo_green_light" />
+
 </LinearLayout>

@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -47,18 +48,20 @@ public class FlipLayout extends FrameLayout {
     private Paint mShadePaint = new Paint();
     private boolean isFlipping = false;
 
-    private int flipTimes = 0;
-    private int timesCount = 0;
+    private int maxUnit = 12; // 默认的最大值，即数值变化在0~maxUnit
 
     private FlipOverListener mFlipOverListener;
 
     public FlipLayout(Context context) {
-        super(context, null);
+        this(context, null);
     }
 
     public FlipLayout(Context context, AttributeSet attrs) {
-        super(context, attrs, 0);
+        this(context, attrs, 0);
+    }
 
+    public FlipLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.FlipLayout);
 
         int resId = array.getResourceId(R.styleable.FlipLayout_flipTextBackground, -1);
@@ -66,19 +69,27 @@ public class FlipLayout extends FrameLayout {
         if (-1 == resId) {
             color = array.getColor(R.styleable.FlipLayout_flipTextBackground, Color.WHITE);
         }
-        float size = array.getDimension(R.styleable.FlipLayout_flipTextSize, 36);
-        size = px2dip(context, size);
+        float size = array.getDimensionPixelSize(R.styleable.FlipLayout_flipTextSize, 36);
         int textColor = array.getColor(R.styleable.FlipLayout_flipTextColor, Color.BLACK);
 
         array.recycle();
         init(context, resId, color, size, textColor);
     }
 
+    /**
+     * 初始化操作
+     *
+     * @param context
+     * @param resId
+     * @param color
+     * @param size
+     * @param textColor
+     */
     private void init(Context context, int resId, int color, float size, int textColor) {
         mScroller = new Scroller(context, new DecelerateInterpolator());//减速 动画插入器
 
         mInvisibleTextView = new TextView(context);
-        mInvisibleTextView.setTextSize(size);
+        mInvisibleTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         mInvisibleTextView.setText("0");
         mInvisibleTextView.setGravity(Gravity.CENTER);
         mInvisibleTextView.setIncludeFontPadding(false);
@@ -91,7 +102,7 @@ public class FlipLayout extends FrameLayout {
         addView(mInvisibleTextView);
 
         mVisibleTextView = new TextView(context);
-        mVisibleTextView.setTextSize(size);
+        mVisibleTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
         mVisibleTextView.setText("0");
         mVisibleTextView.setGravity(Gravity.CENTER);
         mVisibleTextView.setIncludeFontPadding(false);
@@ -110,11 +121,22 @@ public class FlipLayout extends FrameLayout {
         mShinePaint.setStyle(Paint.Style.FILL);
     }
 
-    public FlipLayout(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
+    /**
+     * 设置变化数字单位的最大值
+     *
+     * @param maxUnit
+     */
+    public void setMaxUnit(int maxUnit) {
+        this.maxUnit = maxUnit;
     }
 
-
+    /**
+     * 单位转换
+     *
+     * @param context
+     * @param pxValue
+     * @return
+     */
     public static float px2dip(Context context, float pxValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return pxValue / scale + 0.5f;
@@ -169,6 +191,7 @@ public class FlipLayout extends FrameLayout {
             drawFlipHalf(canvas);
             postInvalidate();
         } else {
+            Log.d("TAG", "------dispatchDraw------>");
             if (isFlipping) {
                 showViews(canvas);
             }
@@ -176,21 +199,23 @@ public class FlipLayout extends FrameLayout {
             if (mScroller.isFinished() && !mScroller.computeScrollOffset()) {
                 isFlipping = false;
             }
+            // 动画停止的操作
 
-            if (timesCount < flipTimes) {
-                timesCount += 1;
-
-                initTextView();
-                isFlipping = true;
-                mScroller.startScroll(0, 0, 0, layoutHeight, getAnimDuration(flipTimes - timesCount));
-                postInvalidate();
-            } else {
-                timesCount = 0;
-                flipTimes = 0;
-                if (null != mFlipOverListener && !isFlipping()) {
-                    mFlipOverListener.onFLipOver(FlipLayout.this);
-                }
-            }
+//            // 次数控制
+//            if (timesCount < flipTimes) {
+//                timesCount += 1;
+//
+//                initTextView();
+//                isFlipping = true;
+//                mScroller.startScroll(0, 0, 0, layoutHeight, 1000);
+//                postInvalidate();
+//            } else {
+//                timesCount = 0;
+//                flipTimes = 0;
+//                if (null != mFlipOverListener && !isFlipping()) {
+//                    mFlipOverListener.onFLipOver(FlipLayout.this);
+//                }
+//            }
         }
 
     }
@@ -205,6 +230,10 @@ public class FlipLayout extends FrameLayout {
         String past = mInvisibleTextView.getText().toString();
         mVisibleTextView.setText(past);
         mInvisibleTextView.setText(current);
+
+        Log.d("TAG", "-----current---->" + current);
+        Log.d("TAG", "-----past---->" + past);
+
         //防止切换抖动
         drawChild(canvas, mVisibleTextView, 0);
     }
@@ -214,7 +243,7 @@ public class FlipLayout extends FrameLayout {
      */
     private void drawBottomHalf(Canvas canvas) {
         canvas.save();
-
+        // 控制画布的显示区域和需要显示的子View
         canvas.clipRect(mBottomRect);
         View drawView = isUp ? mInvisibleTextView : mVisibleTextView;
         drawChild(canvas, drawView, 0);
@@ -244,12 +273,12 @@ public class FlipLayout extends FrameLayout {
         mCamera.save();
 
         View view = null;
-        float deg = getDeg();
-        if (deg > 90) {
-            canvas.clipRect(isUp ? mTopRect : mBottomRect);
+        float deg = getDeg(); // 翻转的角度
+        if (deg > 90) { // 大于90度，实现新View下半部分的视觉翻转
+            canvas.clipRect(isUp ? mTopRect : mBottomRect); // 控制显示区域
             mCamera.rotateX(isUp ? deg - 180 : -(deg - 180));
             view = mInvisibleTextView;
-        } else {
+        } else { // 小于等于90度,实现旧View上半部分的视觉翻转
             canvas.clipRect(isUp ? mBottomRect : mTopRect);
             mCamera.rotateX(isUp ? deg : -deg);
             view = mVisibleTextView;
@@ -294,6 +323,12 @@ public class FlipLayout extends FrameLayout {
         }
     }
 
+    /**
+     * 计算翻页的阴阳面的透明度
+     *
+     * @param degreesFlipped
+     * @return
+     */
     private int getAlpha(float degreesFlipped) {
         return (int) ((degreesFlipped / 90f) * 100);
     }
@@ -308,34 +343,34 @@ public class FlipLayout extends FrameLayout {
     /**
      * 初始化隐藏textView显示的值
      */
-    private void initTextView() {
-        int visibleValue = Integer.parseInt(mVisibleTextView.getText().toString());
-        int invisibleValue = isUp ? visibleValue - 1 : visibleValue + 1;
-
-        if (invisibleValue < 0) {
-            invisibleValue += 10;
-        }
-
-        if (invisibleValue >= 10) {
-            invisibleValue -= 10;
-        }
-
-        mInvisibleTextView.setText(String.valueOf(invisibleValue));
+    private void initTextView(int nextValue) {
+//        int visibleValue = Integer.parseInt(mVisibleTextView.getText().toString());
+//        int invisibleValue = isUp ? visibleValue - 1 : visibleValue + 1;
+//
+//        if (invisibleValue < 0) {
+//            invisibleValue += 10;
+//        }
+//
+//        if (invisibleValue >= 10) {
+//            invisibleValue -= 10;
+//        }
+//
+//        mInvisibleTextView.setText(String.valueOf(invisibleValue));
     }
 
-    /**
-     * 根据传入的次数计算动画的时间
-     * 控制翻页速度
-     */
-    private int getAnimDuration(int times) {
-//        Log.e(TAG,"计算用的次数： " + times);
-        if (times <= 0) {
-            times = 1;
-        }
-        int animDuration = 500 - (500 - 100) / 9 * times;
-//        Log.e(TAG, "animDuration: " + animDuration);
-        return 2000;
-    }
+//    /**
+//     * 根据传入的次数计算动画的时间
+//     * 控制翻页速度
+//     */
+//    private int getAnimDuration(int times) {
+////        Log.e(TAG,"计算用的次数： " + times);
+//        if (times <= 0) {
+//            times = 1;
+//        }
+//        int animDuration = 500 - (500 - 100) / 9 * times;
+////        Log.e(TAG, "animDuration: " + animDuration);
+//        return 1000;
+//    }
 
     public static interface FlipOverListener {
         /**
@@ -349,28 +384,15 @@ public class FlipLayout extends FrameLayout {
     //----------API-------------
 
     /**
-     * 带动画翻动
-     * 需要翻动几次
-     *
-     * @param value    需要翻动的次数
-     * @param isFlipUp 方向标识 true: 往上翻转 , false: 往下翻转
+     * @param nextValue 下一个值
+     * @param isFlipUp  方向标识 true: 往上翻转 , false: 往下翻转
      */
-    public void smoothFlip(int value, boolean isFlipUp) {
-//        Log.e(TAG,"翻动的次数: " + value);
-        if (value <= 0) {
-            //回调接口
-            if (null != mFlipOverListener) {
-                mFlipOverListener.onFLipOver(FlipLayout.this);
-            }
-            return;
-        }
-        flipTimes = value;
+    public void smoothFlip(int nextValue, boolean isFlipUp) {
         this.isUp = isFlipUp;
         // 初始化默认显示
-        initTextView();
+        mInvisibleTextView.setText(String.valueOf(nextValue));
         isFlipping = true;
-        mScroller.startScroll(0, 0, 0, layoutHeight, getAnimDuration(flipTimes - timesCount));
-        timesCount = 1;
+        mScroller.startScroll(0, 0, 0, layoutHeight, 600);
         postInvalidate();
     }
 
@@ -400,10 +422,6 @@ public class FlipLayout extends FrameLayout {
 
     public boolean isUp() {
         return isUp;
-    }
-
-    public int getTimesCount() {
-        return timesCount;
     }
 
     /**

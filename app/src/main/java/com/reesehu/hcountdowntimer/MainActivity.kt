@@ -12,6 +12,10 @@ import kotlinx.android.synthetic.main.content_main.*
  * 仿日历微型翻页效果的数字倒计时器实现
  */
 class MainActivity : AppCompatActivity() {
+//
+//    private val mNumCdView by lazy {
+//        findViewById<NumberCDView>(R.id.num_cd_view)
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,10 +28,13 @@ class MainActivity : AppCompatActivity() {
         }
         bit_flip.flip(0) // 设置默认为0
         btn_test.setOnClickListener {
-            var string = et_seconds.text
-            var number = Integer.parseInt(string?.toString())
-            bit_flip.smoothFlip(number, false)
+            //            var string = et_seconds.text
+//            var number = Integer.parseInt(string?.toString())
+            bit_flip.smoothFlip(1, false)
         }
+//
+//        mNumCdView.setCountDownValues(43203000)
+//        mNumCdView.start()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

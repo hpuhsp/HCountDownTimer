@@ -2,9 +2,16 @@
 <resources>
 
     <declare-styleable name="FlipLayout">
-        <attr name="flipTextBackground" format="color|reference"/>
-        <attr name="flipTextSize" format="dimension"/>
-        <attr name="flipTextColor" format="color"/>
+        <attr name="flipTextBackground" format="color|reference" />
+        <attr name="flipTextSize" format="dimension" />
+        <attr name="flipTextColor" format="color" />
     </declare-styleable>
-
+    <declare-styleable name="FlipsView">
+        <attr name="flips_view_unit">
+            <enum name="day" value="0x7b" />
+            <enum name="hour" value="0x7c" />
+            <enum name="minute" value="0x7d" />
+            <enum name="second" value="0x7e" />
+        </attr>
+    </declare-styleable>
 </resources>
