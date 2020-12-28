@@ -1,10 +1,11 @@
 package com.reesehu.hcountdowntimer.view;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
 
 import com.reesehu.hcountdowntimer.MyCountDownTimer;
 import com.reesehu.hcountdowntimer.R;
